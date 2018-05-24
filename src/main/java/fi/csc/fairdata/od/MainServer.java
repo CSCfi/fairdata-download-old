@@ -8,13 +8,15 @@ import java.util.Map;
 
 import io.undertow.Undertow;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.Headers;
+//import io.undertow.util.Headers;
 import io.undertow.server.HttpHandler;
 /**
  * @author pj
  *
  */
 public class MainServer {
+	
+	public final static String DATASET = "/api/v1/dataset/";
 
 	/**
 	 * @param args
@@ -25,11 +27,14 @@ public class MainServer {
                 .setHandler(new HttpHandler() {
                     //@Override
                     public void handleRequest(final HttpServerExchange exchange) throws Exception {
-                        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
-                    	if (exchange.getRequestPath().startsWith("/api/v1")) {
+                    	Prosessor p = new Prosessor(exchange);
+                    	String rp = exchange.getRequestPath();
+                    	if (rp.startsWith("/api/v1/files")) {
                     		Map<String, Deque<String>> m = exchange.getQueryParameters();
-                    		exchange.getResponseSender().send("Hello "+ m.get("file"));
-                    	} else {
+                    		exchange.getResponseSender().send(p.files(m));
+                    	} else if (rp.startsWith(DATASET)){                   		
+                    		exchange.getResponseSender().send(p.dataset(rp.substring(DATASET.length())));
+                    	} else { //ready for v2
                     		exchange.getResponseSender().send(exchange.getRequestPath());
                     	}
                     }
