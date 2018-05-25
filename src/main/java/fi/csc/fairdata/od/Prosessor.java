@@ -2,8 +2,8 @@
  * 
  */
 package fi.csc.fairdata.od;
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
+//import java.io.UnsupportedEncodingException;
+//import java.nio.ByteBuffer;
 import java.util.Deque;
 import java.util.Map;
 
@@ -25,6 +25,11 @@ public class Prosessor {
 	public String files(Map<String, Deque<String>> m ) {
 		StringBuilder bb = new StringBuilder();
 		exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+		Deque<String> ds = m.get("datasetid");
+		if (null != ds)
+			bb.append(ds.getFirst() + "\n");
+		else 
+			bb.append("datasetid on pakollinen parametri!!!");
 		Deque<String> dsf = m.get("file");
 		if (null != dsf)
 			dsf.forEach(e -> bb.append(e+ " "));
@@ -41,14 +46,5 @@ public class Prosessor {
 		return id;
 	
 	}
-	/*
-	private byte[] getUTF8bytes(String s) {
-		try {
-			return s.getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return new byte[0];
-		}
-	}*/
-	
+
 }
