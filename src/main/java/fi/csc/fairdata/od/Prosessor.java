@@ -26,17 +26,19 @@ public class Prosessor {
 		StringBuilder bb = new StringBuilder();
 		exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
 		Deque<String> ds = m.get("datasetid");
-		if (null != ds)
+		if (null != ds) {
 			bb.append(ds.getFirst() + "\n");
-		else 
+			Deque<String> dsf = m.get("file");
+			if (null != dsf)
+				dsf.forEach(e -> bb.append(e+ " "));
+			Deque<String> dsd = m.get("dir");
+			bb.append("\n");
+			if (null != dsd)
+				dsd.forEach(e -> bb.append(e+" "));
+		} else {
+			this.exchange.setStatusCode(400);
 			bb.append("datasetid on pakollinen parametri!!!");
-		Deque<String> dsf = m.get("file");
-		if (null != dsf)
-			dsf.forEach(e -> bb.append(e+ " "));
-		Deque<String> dsd = m.get("dir");
-		bb.append("\n");
-		if (null != dsd)
-			dsd.forEach(e -> bb.append(e+" "));
+		}
 		return bb.toString();
 	}
 

@@ -35,7 +35,10 @@ public class MainServer {
                     	} else if (rp.startsWith(DATASET)){                   		
                     		exchange.getResponseSender().send(p.dataset(rp.substring(DATASET.length())));
                     	} else { //ready for v2
-                    		exchange.getResponseSender().send(exchange.getRequestPath());
+                    		//exchange.setResponseCode(400);  //BadRequest .getResponseHeaders().
+                    		exchange.setStatusCode(400);
+                    		exchange.getResponseSender().send(exchange.getRequestPath()+
+                    				" Not start with '/api/v1/files' or '"+DATASET+"'");
                     	}
                     }
                 }).build();

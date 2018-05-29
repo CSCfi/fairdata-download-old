@@ -4,7 +4,7 @@
     <groupId>fi.csc.fairdata</groupId>
     <artifactId>od</artifactId>
     <version>0.0.1</version>
-    <packaging>jar</packaging>
+    <!-- packaging>jar</packaging -->
     <name>Simple underdow webapp service </name>
     <description>Simple undertow webapp service </description>
    
@@ -41,6 +41,7 @@
                 </plugin>
       <plugin>
       <artifactId>maven-assembly-plugin</artifactId>
+      <!-- usage mvn clean compile assembly:single -->
       <configuration>
         <archive>
           <manifest>
