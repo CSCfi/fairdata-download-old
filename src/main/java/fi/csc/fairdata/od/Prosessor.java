@@ -21,17 +21,18 @@ public class Prosessor {
 	Prosessor(HttpServerExchange exchange) {
 		this.exchange = exchange;
 	}
-	
-	public String files(Map<String, Deque<String>> m ) {
+		
+	public String dataset(String rp, Map<String, Deque<String>> mp) {
+		
 		StringBuilder bb = new StringBuilder();
 		exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
-		Deque<String> ds = m.get("datasetid");
-		if (null != ds) {
-			bb.append(ds.getFirst() + "\n");
-			Deque<String> dsf = m.get("file");
+		String dsid =getDatasetID(rp);
+		if (null != dsid) {
+			bb.append(dsid + "\n");
+			Deque<String> dsf = mp.get("file");
 			if (null != dsf)
 				dsf.forEach(e -> bb.append(e+ " "));
-			Deque<String> dsd = m.get("dir");
+			Deque<String> dsd = mp.get("dir");
 			bb.append("\n");
 			if (null != dsd)
 				dsd.forEach(e -> bb.append(e+" "));
@@ -42,11 +43,15 @@ public class Prosessor {
 		return bb.toString();
 	}
 
-	public String dataset(String id) {
-		
-		exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
-		return id;
-	
+	private String getDatasetID(String rp) {
+		String loppu =rp.substring(MainServer.DATASET.length());
+		if (loppu.isEmpty() || loppu.equals("") || loppu.equals("?"))
+			return null;
+		int end = loppu.indexOf("?");
+		if ( end < 1) 
+			return loppu;
+		else 
+			return loppu.substring(0, end);
 	}
 
 }
