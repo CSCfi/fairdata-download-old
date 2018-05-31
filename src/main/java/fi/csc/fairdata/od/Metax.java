@@ -18,7 +18,10 @@ import java.util.Base64;
  */
 public class Metax {
 
-	private final static String METAXURL = "https://metax-test.csc.fi/rest/files/";
+	private final static String METAXREST = "https://metax-test.csc.fi/rest/";
+	private final static String METAXDATASETURL = METAXREST+"datasets/";
+	private final static String METAXFILEURL = METAXREST+"files/";
+	private final static String FORMAT = "?format=json";
 	String encoding = null;
 
 	
@@ -30,12 +33,49 @@ public class Metax {
 		}
 	}
 
+	public String dataset(String id) {
+		StringBuffer content = new StringBuffer();
+		HttpURLConnection con = null;
+		try {
+			URL url = new URL(METAXDATASETURL+id+FORMAT);
+			con = (HttpURLConnection) url.openConnection();
+			con.setRequestMethod("GET");			
+			BufferedReader in = new BufferedReader(
+					new InputStreamReader(con.getInputStream(), "UTF-8"));//con.getContentEncoding()
+			String inputLine;
+			while ((inputLine = in.readLine()) != null) {
+				content.append(inputLine);
+			}
+			in.close();
+			con.disconnect(); //??
+
+		} catch (IOException e2) {
+			try {
+			int respCode = ((HttpURLConnection)con).getResponseCode();
+			InputStream es = ((HttpURLConnection)con).getErrorStream();
+			int ret = 0;
+			byte[] buf = new byte[8192];
+            while ((ret = es.read(buf)) > 0) {
+            	System.err.print("Dataset virhetilanne "+respCode+": ");
+            	System.err.write(buf);
+            	System.err.println();
+            }
+            es.close();
+	        } catch (IOException e3) {
+	        	System.err.println(e3.getMessage());
+	        }
+			System.err.println(e2.getMessage());
+		}
+
+		return content.toString();
+	}
+	
+	
 	public boolean file(String id) {	
-		//StringBuffer content = new StringBuffer();
 		boolean b = false;
 		HttpURLConnection con = null;
 		try {
-			URL url = new URL(METAXURL+id);
+			URL url = new URL(METAXFILEURL+id+FORMAT);
 			con = (HttpURLConnection) url.openConnection();
 			con.setRequestMethod("GET");			
 			con.setRequestProperty  ("Authorization", "Basic " + encoding);
@@ -49,7 +89,7 @@ public class Metax {
 					if (inputLine.contains("true")) 
 						b = true;
 				} 
-				//content.append(inputLine);
+				
 			}
 			in.close();
 			con.disconnect(); //??
@@ -62,7 +102,8 @@ public class Metax {
 	                // read the response body
 	                byte[] buf = new byte[8192];
 	                while ((ret = es.read(buf)) > 0) {
-	                	System.err.println("Virhetilanne: "+buf);
+	                	System.err.println("File virhetilanne "+respCode+": "+buf.toString());
+	                	
 	                }
 	                // close the errorstream
 	                es.close();
