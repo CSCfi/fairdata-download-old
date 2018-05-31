@@ -2,6 +2,9 @@
  * 
  */
 package fi.csc.fairdata.od;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.ByteBuffer;
 //import java.io.UnsupportedEncodingException;
 //import java.nio.ByteBuffer;
 import java.util.Deque;
@@ -18,6 +21,7 @@ import io.undertow.util.Headers;
  */
 public class Prosessor {
 	
+	private static final String ZIP = ".zip";
 	HttpServerExchange exchange;
 	Metax m = null;
 	
@@ -25,29 +29,49 @@ public class Prosessor {
 		this.exchange = exchange;
 	}
 		
-	public String dataset(String rp, Map<String, Deque<String>> mp) {
-		
-		StringBuilder bb = new StringBuilder();
+	public ByteBuffer dataset(String rp, Map<String, Deque<String>> mp) {
+				
 		List<String> lf = null;
-		exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+	
 		String dsid =getDatasetID(rp); 
 		if (null != dsid) {
-			bb.append(dsid + "\n");
 			m = new Metax();
 			Deque<String> dsf = mp.get("file");
-			if (null != dsf) {
+			/*if (null != dsf) {
 				lf = dsf.stream().filter(f -> oikeudet(f)).collect(Collectors.toList());
-				lf.forEach(e -> bb.append(e+ " "));
-			}
+			}*/
 			Deque<String> dsd = mp.get("dir");
-			bb.append("\n");
-			if (null != dsd)
-				dsd.forEach(e -> bb.append(e+" "));
-		} else {
+			//if (null != dsd)
+			//	dsd.forEach(e -> bb.append(e+" "));
+			String vastaus = m.dataset(dsid);
+			Zip zip = new Zip();
+			exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/octet-stream; charset=UTF-8");
+			try {
+				String dz = dsid+ZIP;
+				exchange.getResponseHeaders().put(Headers.CONTENT_DISPOSITION, "attachment;filename=\""+dz
+						                        + "\"; filename*=UTF-8''" +URLEncoder.encode(dz, "UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				System.err.println("UTF-8 ei muka löydy!");
+				e.printStackTrace();
+			}
+			Json json = new Json();
+			List<String> files = json.file(vastaus);
+			return zip.string(dsid, vastaus);
+		} else {	
+			exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
 			this.exchange.setStatusCode(400);
-			bb.append("datasetid on pakollinen parametri!!!");
+			byte[] ba = null;
+			try {
+				ba = "datasetid on pakollinen parametri!!!".getBytes("UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				System.err.println("UTF-8 ei muka löydy!!");
+				e.printStackTrace();
+			}
+			ByteBuffer bb = ByteBuffer.allocate(ba.length);
+			bb.put(ba);
+			return  bb;
 		}
-		return bb.toString();
+	
 	}
 
 	/**

@@ -32,6 +32,7 @@ public class MainServer {
                     	if (rp.startsWith(DATASET)){   
                     		 Map<String, Deque<String>> m = exchange.getQueryParameters();
                     		exchange.getResponseSender().send(p.dataset(rp, m));
+                    		//exchange.putAttachment(key, value)
                     	} else { //ready for v2
                     		//exchange.setResponseCode(400);  //BadRequest .getResponseHeaders().
                     		exchange.setStatusCode(400);
