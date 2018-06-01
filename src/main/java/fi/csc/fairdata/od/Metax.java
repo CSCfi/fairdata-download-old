@@ -20,6 +20,7 @@ public class Metax {
 
 	private final static String METAXREST = "https://metax-test.csc.fi/rest/";
 	private final static String METAXDATASETURL = METAXREST+"datasets/";
+	private final static String METAXDIRURL = METAXREST+"directories/";
 	private final static String METAXFILEURL = METAXREST+"files/";
 	private final static String FORMAT = "?format=json";
 	String encoding = null;
@@ -34,42 +35,51 @@ public class Metax {
 	}
 
 	public String dataset(String id) {
-		StringBuffer content = new StringBuffer();
-		HttpURLConnection con = null;
-		try {
-			URL url = new URL(METAXDATASETURL+id+FORMAT);
-			con = (HttpURLConnection) url.openConnection();
-			con.setRequestMethod("GET");			
-			BufferedReader in = new BufferedReader(
-					new InputStreamReader(con.getInputStream(), "UTF-8"));//con.getContentEncoding()
-			String inputLine;
-			while ((inputLine = in.readLine()) != null) {
-				content.append(inputLine);
-			}
-			in.close();
-			con.disconnect(); //??
-
-		} catch (IOException e2) {
-			try {
-			int respCode = ((HttpURLConnection)con).getResponseCode();
-			InputStream es = ((HttpURLConnection)con).getErrorStream();
-			int ret = 0;
-			byte[] buf = new byte[8192];
-            while ((ret = es.read(buf)) > 0) {
-            	System.err.print("Dataset virhetilanne "+respCode+": ");
-            	System.err.write(buf);
-            	System.err.println();
-            }
-            es.close();
-	        } catch (IOException e3) {
-	        	System.err.println(e3.getMessage());
-	        }
-			System.err.println(e2.getMessage());
-		}
-
-		return content.toString();
+		return metaxrest(id, METAXDATASETURL, false, "Dataset");
 	}
 	
+	public String directories(String id) {
+		return metaxrest(id, METAXDIRURL, true, "Dir");
+	}
+	
+	String metaxrest(String id, String url, boolean auth, String name ) {
+	StringBuffer content = new StringBuffer();
+	HttpURLConnection con = null;
+	try {
+		URL furl = new URL(url+id+FORMAT);
+		con = (HttpURLConnection) furl.openConnection();
+		con.setRequestMethod("GET");	
+		if (auth)
+			con.setRequestProperty  ("Authorization", "Basic " + encoding);
+		BufferedReader in = new BufferedReader(
+				new InputStreamReader(con.getInputStream(), "UTF-8"));//con.getContentEncoding()
+		String inputLine;
+		while ((inputLine = in.readLine()) != null) {
+			content.append(inputLine);
+		}
+		in.close();
+		con.disconnect(); //??
+
+	} catch (IOException e2) {
+		try {
+		int respCode = ((HttpURLConnection)con).getResponseCode();
+		InputStream es = ((HttpURLConnection)con).getErrorStream();
+		int ret = 0;
+		byte[] buf = new byte[8192];
+        while ((ret = es.read(buf)) > 0) {
+        	System.err.print(name +" virhetilanne "+respCode+": ");
+        	System.err.write(buf);
+        	System.err.println();
+        }
+        es.close();
+        } catch (IOException e3) {
+        	System.err.println(e3.getMessage());
+        }
+		System.err.println(e2.getMessage());
+	}
+
+	return content.toString();
+}
 	
 	public boolean file(String id) {	
 		boolean b = false;
