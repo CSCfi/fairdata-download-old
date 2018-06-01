@@ -24,6 +24,7 @@ public class Prosessor {
 	private static final String ZIP = ".zip";
 	HttpServerExchange exchange;
 	Metax m = null;
+	Zip zip = null;
 	
 	Prosessor(HttpServerExchange exchange) {
 		this.exchange = exchange;
@@ -40,11 +41,11 @@ public class Prosessor {
 			/*if (null != dsf) {
 				lf = dsf.stream().filter(f -> oikeudet(f)).collect(Collectors.toList());
 			}*/
+			zip = new Zip();
 			Deque<String> dsd = mp.get("dir");
-			//if (null != dsd)
-			//	dsd.forEach(e -> bb.append(e+" "));
+			if (null != dsd)
+				dsd.forEach(e -> dirprosess(e+" "));
 			String vastaus = m.dataset(dsid);
-			Zip zip = new Zip();
 			exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/octet-stream; charset=UTF-8");
 			try {
 				String dz = dsid+ZIP;
@@ -56,7 +57,8 @@ public class Prosessor {
 			}
 			Json json = new Json();
 			List<String> files = json.file(vastaus);
-			return zip.string(dsid, vastaus);
+			zip.entry(dsid, vastaus);
+			return zip.getFinal();
 		} else {	
 			exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
 			this.exchange.setStatusCode(400);
@@ -86,6 +88,11 @@ public class Prosessor {
 		return m.file(id);
 	}
 
+	private void dirprosess(String id) {
+		String j = m.directories(id);
+		zip.entry(id, j);
+	}
+	
 	private String getDatasetID(String rp) {
 		String loppu =rp.substring(MainServer.DATASET.length());
 		if (loppu.isEmpty() || loppu.equals("") || loppu.equals("?"))
