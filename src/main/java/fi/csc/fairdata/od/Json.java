@@ -25,9 +25,14 @@ public class Json {
 	public List<String> file(String vastaus) {
 		Gson gson = new GsonBuilder().create();
 		JsonObject jo = gson.fromJson(vastaus, JsonObject.class);
-		JsonArray ja = jo.get("research_dataset").getAsJsonObject().get("files").getAsJsonArray();
-		ja.forEach(o -> etsiidt(o));
-		return ls;
+		try {
+			JsonArray ja = jo.get("research_dataset").getAsJsonObject().get("files").getAsJsonArray();
+			ja.forEach(o -> etsiidt(o));
+			return ls;
+		} catch (java.lang.NullPointerException e) {
+			System.err.println("Datasetistä ei löytynyt tiedostoja.");
+			return null;
+		}
 	}
 
 	private void etsiidt(JsonElement o) {

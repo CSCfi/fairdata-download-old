@@ -23,11 +23,13 @@ public class Prosessor {
 	
 	private static final String ZIP = ".zip";
 	HttpServerExchange exchange;
+	String auth;
 	Metax m = null;
 	Zip zip = null;
 	
-	Prosessor(HttpServerExchange exchange) {
+	Prosessor(HttpServerExchange exchange, String auth) {
 		this.exchange = exchange;
+		this.auth = auth;
 	}
 		
 	public ByteBuffer dataset(String rp, Map<String, Deque<String>> mp) {
@@ -36,7 +38,7 @@ public class Prosessor {
 	
 		String dsid =getDatasetID(rp); 
 		if (null != dsid) {
-			m = new Metax();
+			m = new Metax(dsid, auth);
 			Deque<String> dsf = mp.get("file");
 			/*if (null != dsf) {
 				lf = dsf.stream().filter(f -> oikeudet(f)).collect(Collectors.toList());
@@ -44,7 +46,7 @@ public class Prosessor {
 			zip = new Zip();
 			Deque<String> dsd = mp.get("dir");
 			if (null != dsd)
-				dsd.forEach(e -> dirprosess(e+" "));
+				dsd.forEach(e -> dirprosess(e));
 			String vastaus = m.dataset(dsid);
 			exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/octet-stream; charset=UTF-8");
 			try {
@@ -90,7 +92,7 @@ public class Prosessor {
 
 	private void dirprosess(String id) {
 		String j = m.directories(id);
-		zip.entry(id, j);
+		zip.entry(Metax.DIR+id, j);
 	}
 	
 	private String getDatasetID(String rp) {

@@ -23,12 +23,15 @@ public class Metax {
 	private final static String METAXDIRURL = METAXREST+"directories/";
 	private final static String METAXFILEURL = METAXREST+"files/";
 	private final static String FORMAT = "?format=json";
+	public final static String DIR = "Dir";
+	String datasetid;
 	String encoding = null;
 
 	
-	public Metax() {
+	public Metax(String id, String auth) {
+		this.datasetid = id;
 		try {
-			encoding = Base64.getEncoder().encodeToString(("placeholder").getBytes("UTF-8"));
+			encoding = Base64.getEncoder().encodeToString((auth).getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -39,14 +42,16 @@ public class Metax {
 	}
 	
 	public String directories(String id) {
-		return metaxrest(id, METAXDIRURL, true, "Dir");
+		return metaxrest(id, METAXDIRURL, true, DIR);
 	}
 	
 	String metaxrest(String id, String url, boolean auth, String name ) {
 	StringBuffer content = new StringBuffer();
 	HttpURLConnection con = null;
-	try {
-		URL furl = new URL(url+id+FORMAT);
+	try { //+/?cr_identifier="+datasetid "&recursive=true"
+		String optio = name.equals(DIR) ? "/files" : ""; 
+		//String optio2 = name.equals(DIR) ? "&" : "?"; 
+		URL furl = new URL(url+id+optio+FORMAT);
 		con = (HttpURLConnection) furl.openConnection();
 		con.setRequestMethod("GET");	
 		if (auth)
