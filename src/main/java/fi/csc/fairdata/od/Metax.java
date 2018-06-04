@@ -37,21 +37,21 @@ public class Metax {
 		}
 	}
 
-	public String dataset(String id) {
+	public MetaxResponse dataset(String id) {
 		return metaxrest(id, METAXDATASETURL, false, "Dataset");
 	}
 	
-	public String directories(String id) {
+	public MetaxResponse directories(String id) {
 		return metaxrest(id, METAXDIRURL, true, DIR);
 	}
 	
-	String metaxrest(String id, String url, boolean auth, String name ) {
+	MetaxResponse metaxrest(String id, String url, boolean auth, String name ) {
 	StringBuffer content = new StringBuffer();
 	HttpURLConnection con = null;
 	try { //+/?cr_identifier="+datasetid "&recursive=true"
 		String optio = name.equals(DIR) ? "/files" : ""; 
-		//String optio2 = name.equals(DIR) ? "&" : "?"; 
-		URL furl = new URL(url+id+optio+FORMAT);
+		String optio2 = name.equals(DIR) ? "&recursive=true" : ""; 
+		URL furl = new URL(url+id+optio+FORMAT+optio2);
 		con = (HttpURLConnection) furl.openConnection();
 		con.setRequestMethod("GET");	
 		if (auth)
@@ -64,26 +64,28 @@ public class Metax {
 		}
 		in.close();
 		con.disconnect(); //??
-
+		return new MetaxResponse(con.getResponseCode(), content.toString());
 	} catch (IOException e2) {
 		try {
 		int respCode = ((HttpURLConnection)con).getResponseCode();
 		InputStream es = ((HttpURLConnection)con).getErrorStream();
 		int ret = 0;
 		byte[] buf = new byte[8192];
+		System.err.print(name +" virhetilanne "+respCode+": ");
         while ((ret = es.read(buf)) > 0) {
-        	System.err.print(name +" virhetilanne "+respCode+": ");
-        	System.err.write(buf);
+        	content.append(buf);
+        	System.err.write(buf); 
         	System.err.println();
         }
         es.close();
+        return new MetaxResponse(respCode, content.toString());
         } catch (IOException e3) {
         	System.err.println(e3.getMessage());
         }
 		System.err.println(e2.getMessage());
 	}
 
-	return content.toString();
+	return new MetaxResponse(1234, "");
 }
 	
 	public boolean file(String id) {	

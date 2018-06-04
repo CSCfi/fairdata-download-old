@@ -47,7 +47,10 @@ public class Prosessor {
 			Deque<String> dsd = mp.get("dir");
 			if (null != dsd)
 				dsd.forEach(e -> dirprosess(e));
-			String vastaus = m.dataset(dsid);
+			MetaxResponse vastaus = m.dataset(dsid);
+			if (vastaus.getCode() == 404) {
+				return virheilmoitus(404, "datasetid: "+dsid+ "Not found.\n"+vastaus.getContent());
+			}
 			exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/octet-stream; charset=UTF-8");
 			try {
 				String dz = dsid+ZIP;
@@ -58,26 +61,30 @@ public class Prosessor {
 				e.printStackTrace();
 			}
 			Json json = new Json();
-			List<String> files = json.file(vastaus);
-			zip.entry(dsid, vastaus);
+			List<String> files = json.file(vastaus.getContent());
+			zip.entry(dsid, vastaus.getContent());
 			return zip.getFinal();
 		} else {	
-			exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
-			this.exchange.setStatusCode(400);
-			byte[] ba = null;
-			try {
-				ba = "datasetid on pakollinen parametri!!!".getBytes("UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				System.err.println("UTF-8 ei muka löydy!!");
-				e.printStackTrace();
-			}
-			ByteBuffer bb = ByteBuffer.allocate(ba.length);
-			bb.put(ba);
-			return  bb;
+			return virheilmoitus(400, "datasetid on pakollinen parametri!!!");
 		}
 	
 	}
 
+	ByteBuffer virheilmoitus(int code, String sisältö) {
+		exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+		this.exchange.setStatusCode(code);
+		byte[] ba = null;
+		try {
+			ba = sisältö.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			System.err.println("UTF-8 ei muka löydy!!");
+			e.printStackTrace();
+		}
+		ByteBuffer bb = ByteBuffer.allocate(ba.length);
+		bb.put(ba);
+		return  bb;
+	}
+	
 	/**
 	 * Tarkistaa metaxista onko tiedosto open_access
 	 * 
@@ -91,8 +98,12 @@ public class Prosessor {
 	}
 
 	private void dirprosess(String id) {
-		String j = m.directories(id);
-		zip.entry(Metax.DIR+id, j);
+		MetaxResponse j = m.directories(id);
+		if (j.getCode() != 200) {
+			zip.entry(Metax.DIR+id, j.getCode() + j.getContent());
+			System.err.println("Dir vastaus: "+j.getCode() + j.getContent());
+		} else 
+			zip.entry(Metax.DIR+id, j.getContent());
 	}
 	
 	private String getDatasetID(String rp) {
