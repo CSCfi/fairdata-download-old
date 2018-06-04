@@ -28,7 +28,7 @@ public class Zip {
 	public void entry(String id, String metadata) {
 		
 		try {
-			zout.putNextEntry(new ZipEntry(id));
+			zout.putNextEntry(new ZipEntry(id.trim()+".json")); //tilapäinen
 			byte[] md = metadata.getBytes("UTF-8");
 			zout.write(md);
 			//System.out.println("Zip debug: "+md.length);
