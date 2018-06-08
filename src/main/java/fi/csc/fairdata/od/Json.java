@@ -26,7 +26,13 @@ public class Json {
 		Gson gson = new GsonBuilder().create();
 		JsonObject jo = gson.fromJson(vastaus, JsonObject.class);
 		try {
-			JsonArray ja = jo.get("research_dataset").getAsJsonObject().get("files").getAsJsonArray();
+			JsonObject rd = jo.get("research_dataset").getAsJsonObject();
+			JsonObject at = rd.get("access_rights").getAsJsonObject().get("access_type").getAsJsonObject();
+			JsonObject pl = at.get("pref_label").getAsJsonObject();
+			if (!pl.get("en").getAsString().equals("Open")) {
+				return null; //Aineisto ei ollut avoin
+			}
+			JsonArray ja = rd.get("files").getAsJsonArray();
 			ja.forEach(o -> etsiidt(o));
 			return ls;
 		} catch (java.lang.NullPointerException e) {

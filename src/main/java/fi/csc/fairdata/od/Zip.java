@@ -5,11 +5,12 @@ package fi.csc.fairdata.od;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 //import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 //import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+
+import javax.servlet.http.HttpServletResponse;
  
 /**
  * @author pj
@@ -19,10 +20,16 @@ public class Zip {
 	
 	ByteArrayOutputStream baos;
 	ZipOutputStream zout;
+	HttpServletResponse response;
 	
-	public Zip() {
-		this.baos = new ByteArrayOutputStream();
-		this.zout = new ZipOutputStream(baos);
+	public Zip(HttpServletResponse r) {
+		
+		try {
+			this.zout = new ZipOutputStream(r.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		this.response = r;
 	}
 
 	public void entry(String id, String metadata) {
@@ -41,17 +48,14 @@ public class Zip {
 	
 	}
 
-	public ByteBuffer getFinal() {
+	public void sendFinal() {
 		try {
 			zout.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		//System.out.println("Zip debug2: "+baos.size());
-		ByteBuffer bb = ByteBuffer.wrap(baos.toByteArray());
-		//System.out.println("Zip debug: "+bb.array().length);
-		return bb;
+
 	}
 
 }
