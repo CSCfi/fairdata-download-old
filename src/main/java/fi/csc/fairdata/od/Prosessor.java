@@ -11,6 +11,7 @@ import java.util.Arrays;
 //import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -26,12 +27,18 @@ public class Prosessor {
 	String auth;
 	Metax m = null;
 	Zip zip = null;
+	Json json = null;
 	
 	Prosessor(Dataset ds, String auth) {
         this.dataset = ds;
 		this.auth = auth;
 	}
-		
+	
+	/**
+	 * Tarkistaa aineiston=dataset avoimuuden ja siihen kuuluvat tiedostot
+	 * 
+	 * @return boolean false ei kopioda tiedostoa. true: haetaan ja kopioidaan tiedostot.
+	 */
 	public boolean metaxtarkistus() {
 
 		List<String> lf = null;
@@ -43,7 +50,6 @@ public class Prosessor {
 			/*if (null != dsf) {
 				lf = dsf.stream().filter(f -> oikeudet(f)).collect(Collectors.toList());
 			}*/
-			zip = new Zip(dataset.getResponse());
 			String dsd = dataset.getDir();
 			if (null != dsd) {
 				String[] sa = dsd.split(",");
@@ -55,6 +61,19 @@ public class Prosessor {
 				return false;
 			}
 			HttpServletResponse r = dataset.getResponse();
+			json = new Json();
+			Vector<List<String>> v = json.file(vastaus.getContent());
+			if (null != v) {
+				List<String> dsfiles = v.firstElement();
+				List<String> dsdirs = v.lastElement();
+				dsdirs.forEach(d -> selvitähakemistonsisältömetaxista(d, dsfiles));
+				zip = new Zip(r);
+				zip.entry("tiedostot"+dsid, dsfiles.toString()); //oikeasti zipattaisiin sisällöt
+			} else {
+				virheilmoitus(400, "Metaxin palauttamien datasetin tietojen parsinta epännistui "+
+			"(yleensä tämä tarkoittaa, että datasetissä ei ole pääsyoikeustietoja).");
+				return false;
+			}
 			r.setContentType("application/octet-stream; charset=UTF-8");
 			try {
 				String dz = dsid+ZIP;
@@ -63,11 +82,8 @@ public class Prosessor {
 			} catch (UnsupportedEncodingException e) {
 				System.err.println("UTF-8 ei muka löydy!");
 				e.printStackTrace();
-			}
-			
-			Json json = new Json();
-			List<String> files = json.file(vastaus.getContent());
-			zip.entry(dsid, vastaus.getContent());
+			}				
+			zip.entry(dsid, vastaus.getContent()); //datasetin metadata: pois oikeasta?
 			zip.sendFinal();
 			//return true;
 			return false; //oikeasti true
@@ -78,7 +94,28 @@ public class Prosessor {
 	}	
 
 	
+	/**
+	 * Selvittää REKURSIIVISESTI (käyttäen  recursive=true parametria) metaxisata
+	 * hakemiston kaikki tiedostot.
+	 * 
+	 * @param dir String hakemiston tunniste
+	 * @param filelist List<String> palautetaan tiedostojen tunnisteet
+	 */
+	public void selvitähakemistonsisältömetaxista(String dir,  List<String> filelist) {
+		MetaxResponse d = m.directories(dir);
+		if (200 == d.getCode())
+			filelist.addAll(json.dir(d.getContent(), this));
+		else {
+			System.err.println("Metax vastasi "+dir+"-hakemistokyselyyn muuta kuin 200: "+d.getCode()+d.getContent());
+		}
+	}
 
+	/**
+	 * Näyttää käyttäjälle virheilmoituksen
+	 * 
+	 * @param code int HTTP status code
+	 * @param sisältö String seliseli
+	 */
 	void virheilmoitus(int code, String sisältö) {
 		HttpServletResponse r = dataset.getResponse();
 		r.setContentType("text/plain");

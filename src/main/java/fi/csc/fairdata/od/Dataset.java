@@ -14,6 +14,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * Olio pyynnön parametrien tallentamiseen
+ * 
  * @author pj
  *
  */
