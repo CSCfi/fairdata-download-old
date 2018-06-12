@@ -118,7 +118,7 @@ public class Prosessor {
 	 */
 	void virheilmoitus(int code, String sisältö) {
 		HttpServletResponse r = dataset.getResponse();
-		r.setContentType("text/plain");
+		r.setContentType("text/plain;charset=UTF-8");
 		r.setStatus(code);
 	    try {
 			r.getWriter().println(sisältö);
