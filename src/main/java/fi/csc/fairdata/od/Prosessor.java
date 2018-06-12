@@ -47,28 +47,32 @@ public class Prosessor {
 		if (null != dsid) {			
 			m = new Metax(dsid, auth);
 			String dsf = dataset.getFile();
-			/*if (null != dsf) {
-				lf = dsf.stream().filter(f -> oikeudet(f)).collect(Collectors.toList());
-			}*/
-			String dsd = dataset.getDir();
-			if (null != dsd) {
-				String[] sa = dsd.split(",");
-				Arrays.asList(sa).forEach(e -> dirprosess(e));
+			if (null != dsf) {
+				lf = Arrays.asList(dsf.split(","));//.stream().collect(Collectors.toList());
 			}
+			HttpServletResponse r = dataset.getResponse();			
+			String dsd = dataset.getDir();
 			MetaxResponse vastaus = m.dataset(dsid);
 			if (vastaus.getCode() == 404) {
 				virheilmoitus(404, "datasetid: "+dsid+ "Not found.\n"+vastaus.getContent());
 				return false;
-			}
-			HttpServletResponse r = dataset.getResponse();
+			}			
 			json = new Json();
 			Vector<List<String>> v = json.file(vastaus.getContent());
 			if (null != v) {
 				List<String> dsfiles = v.firstElement();
 				List<String> dsdirs = v.lastElement();
-				dsdirs.forEach(d -> selvitähakemistonsisältömetaxista(d, dsfiles));
+				dsdirs.forEach(d -> selvitähakemistonsisältömetaxista(d, dsfiles));	
 				zip = new Zip(r);
 				zip.entry("tiedostot"+dsid, dsfiles.toString()); //oikeasti zipattaisiin sisällöt
+				if (null != dsd) {
+					String[] sa = dsd.split(",");
+					Arrays.asList(sa).forEach(e -> dirprosess(e));
+				}
+				if (null != lf) {
+					// oikeasti voisi lisätä zippiin!!!
+					List<String> ok = lf.stream().filter(f -> dsfiles.contains(f)).collect(Collectors.toList());
+				}
 			} else {
 				virheilmoitus(400, "Metaxin palauttamien datasetin tietojen parsinta epännistui "+
 			"(yleensä tämä tarkoittaa, että datasetissä ei ole pääsyoikeustietoja).");

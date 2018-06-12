@@ -39,8 +39,8 @@ public class Json {
 			JsonObject rd = jo.get("research_dataset").getAsJsonObject();
 			try {
 				JsonObject at = rd.get("access_rights").getAsJsonObject().get("access_type").getAsJsonObject();
-				JsonObject pl = at.get("pref_label").getAsJsonObject();
-				if (!pl.get("en").getAsString().equals("Open")) {
+				JsonElement id = at.get("identifier");
+				if (!id.getAsString().contains("access_type/access_type_open_access")) {
 					System.err.println("Aineisto ei ollut avoin.");
 					return null; 
 				}
