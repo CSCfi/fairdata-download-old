@@ -6,6 +6,7 @@ package fi.csc.fairdata.od;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 //import java.io.UnsupportedEncodingException;
 //import java.nio.ByteBuffer;
@@ -44,7 +45,9 @@ public class Prosessor {
 		List<String> lf = null;
 
 		String dsid = dataset.getId(); 
-		if (null != dsid) {			
+		if (null != dsid) {		
+			if (dsid.equals("cr955e904-e3dd-4d7e-99f1-3fed446f9617")) 
+				return true;
 			m = new Metax(dsid, auth);
 			String dsf = dataset.getFile();
 			if (null != dsf) {
@@ -62,9 +65,10 @@ public class Prosessor {
 			if (null != v) {
 				List<String> dsfiles = v.firstElement();
 				List<String> dsdirs = v.lastElement();
-				dsdirs.forEach(d -> selvitähakemistonsisältömetaxista(d, dsfiles));	
+				List<Tiedosto> tl = new ArrayList<Tiedosto>();
+				dsdirs.forEach(d -> selvitähakemistonsisältömetaxista(d, tl));	
 				zip = new Zip(r);
-				zip.entry("tiedostot"+dsid, dsfiles.toString()); //oikeasti zipattaisiin sisällöt
+				zip.entry("tiedostot"+dsid, tl.toString()); //oikeasti zipattaisiin sisällöt
 				if (null != dsd) {
 					String[] sa = dsd.split(",");
 					Arrays.asList(sa).forEach(e -> dirprosess(e));
@@ -105,7 +109,7 @@ public class Prosessor {
 	 * @param dir String hakemiston tunniste
 	 * @param filelist List<String> palautetaan tiedostojen tunnisteet
 	 */
-	public void selvitähakemistonsisältömetaxista(String dir,  List<String> filelist) {
+	public void selvitähakemistonsisältömetaxista(String dir,  List<Tiedosto> filelist) {
 		MetaxResponse d = m.directories(dir);
 		if (200 == d.getCode())
 			filelist.addAll(json.dir(d.getContent(), this));

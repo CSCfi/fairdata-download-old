@@ -21,7 +21,9 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 public class Application extends SpringBootServletInitializer {
 	
 	  private static final String PROPERTIES = "/opt/secrets/metax.properties";
+	  private static final String CONFPROPERTIES = "/opt/od/config.properties";
 	  private static String auth;
+	  private static String metaxURL;
 
 	
 	 @Override
@@ -47,11 +49,20 @@ public class Application extends SpringBootServletInitializer {
          File f = new File(PROPERTIES);
          FileInputStream in = new FileInputStream(f);
          prop.load(in);
-
-      auth= prop.getProperty("auth");
+         auth= prop.getProperty("auth").trim();
+         in.close();
+         f = new File(CONFPROPERTIES);
+         in = new FileInputStream(f);
+         prop.load(in);
+         metaxURL = prop.getProperty("metaxURL").trim();
+         in.close();
      }
      catch (IOException ex) {
          ex.printStackTrace();
      }	
+	}
+
+	public static String getMetax() {
+		return metaxURL;
 	}
 }

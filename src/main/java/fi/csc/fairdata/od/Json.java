@@ -89,10 +89,10 @@ public class Json {
 	 * selvittää hakemiston tiedostot
 	 * 
 	 * @param content String metaxin vastaus hakemistokyselyyn
-	 * @return List<String> tiedostolista
+	 * @return List<Tiedosto> tiedostolista
 	 */
-	public List<String> dir(String content, Prosessor p) {
-		List<String> lsf = new ArrayList<String>();
+	public List<Tiedosto> dir(String content, Prosessor p) {
+		List<Tiedosto> lsf = new ArrayList<Tiedosto>();
 		//List<String> alihakemistot = new ArrayList<String>();
 		Gson gson = new GsonBuilder().create();
 		JsonArray jo = gson.fromJson(content, JsonArray.class);
@@ -108,12 +108,20 @@ public class Json {
 	 * @param o JsonElement tiedoston tiedot
 	 * @param ls List<String>, lista johon tunniste lisätään
 	 */
-	private void etsistorageid(JsonElement o, List<String> ls) {
+	private void etsistorageid(JsonElement o, List<Tiedosto> ls) {
 		
 		if (null != o) {
 			JsonObject i = o.getAsJsonObject().get("file_storage").getAsJsonObject();
-			if (null != i)
-				ls.add(i.get("identifier").getAsString());
+			if (null != i) {	
+					try {
+						String fp = o.getAsJsonObject().get("file_path").getAsString();
+						String id = i.get("identifier").getAsString();
+						ls.add(new Tiedosto(fp, id));
+					} catch (java.lang.NullPointerException e) {
+						System.err.println("Tiedoston tiedot vaillinaiset"+e.getMessage());
+					}					
+			} else
+				System.err.println("file_storage puuttuu: "+o.getAsString());
 		}
 	}
 

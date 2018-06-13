@@ -34,7 +34,7 @@ public class Dataset {
 
 	public void copy() {
 		Tiedostonkäsittely tk = new  Tiedostonkäsittely(response);
-		tk.test(id);
+		tk.test("paituli_78835516.zip");
 	}
 
 	public boolean check() {

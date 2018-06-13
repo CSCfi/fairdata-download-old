@@ -18,10 +18,10 @@ import java.util.Base64;
  */
 public class Metax {
 
-	private final static String METAXREST = "https://metax-test.csc.fi/rest/";
-	private final static String METAXDATASETURL = METAXREST+"datasets/";
-	private final static String METAXDIRURL = METAXREST+"directories/";
-	private final static String METAXFILEURL = METAXREST+"files/";
+	private final String METAXREST;//"https://metax-test.csc.fi/rest/";
+	private final String METAXDATASETURL; // = METAXREST+"datasets/";
+	private final String METAXDIRURL;// = METAXREST+"directories/";
+	private final String METAXFILEURL;// = METAXREST+"files/";
 	private final static String FORMAT = "?format=json";
 	public final static String DIR = "Dir";
 	String datasetid;
@@ -30,6 +30,10 @@ public class Metax {
 	
 	public Metax(String id, String auth) {
 		this.datasetid = id;
+		METAXREST = Application.getMetax();
+		METAXDATASETURL = METAXREST+"datasets/";
+		METAXDIRURL = METAXREST+"directories/";
+		METAXFILEURL = METAXREST+"files/";
 		try {
 			encoding = Base64.getEncoder().encodeToString((auth).getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e) {
@@ -74,8 +78,8 @@ public class Metax {
 		System.err.print(name +" virhetilanne "+respCode+": ");
         while ((ret = es.read(buf)) > 0) {
         	content.append(buf);
-        	System.err.write(buf); 
-        	System.err.println();
+        	//System.err.write(buf); 
+        	System.err.println(METAXDATASETURL);
         }
         es.close();
         return new MetaxResponse(respCode, content.toString());
