@@ -29,11 +29,7 @@ public class Controller {
 	    		@RequestParam(value="dir", required = false) String dir,
 	    		HttpServletResponse response) {
 	    	Dataset ds = new Dataset(id, file, dir, response);
-	    	if (ds.check()) {
-				ds.copy();
-	    	} else {
-	    		//virheilmoitus
-	    	}
+	    	ds.käsittele();
 	    }
 	
 

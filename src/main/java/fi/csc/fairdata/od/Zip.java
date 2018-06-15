@@ -32,21 +32,15 @@ public class Zip {
 		this.response = r;
 	}
 
-	public void entry(String id, String metadata) {
+	public void entry(String path) {
 		
 		try {
-			zout.putNextEntry(new ZipEntry(id.trim()+".json")); //tilapäinen
-			byte[] md = metadata.getBytes("UTF-8");
-			zout.write(md);
-			//System.out.println("Zip debug: "+md.length);
-			zout.closeEntry(); 
-
+			zout.putNextEntry(new ZipEntry(path.trim()));
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
-		
-	
+		}	
 	}
+	
 
 	public void sendFinal() {
 		try {
@@ -54,8 +48,8 @@ public class Zip {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-
 	}
-
+	ZipOutputStream getZout() {
+		return zout;
+	}
 }

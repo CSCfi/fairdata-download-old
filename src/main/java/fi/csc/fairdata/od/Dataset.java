@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -32,14 +33,16 @@ public class Dataset {
 		this.response = response;
 	}
 
-	public void copy() {
-		Tiedostonkäsittely tk = new  Tiedostonkäsittely(response);
-		tk.test("paituli_78835516.zip");
-	}
-
-	public boolean check() {
-		Prosessor p = new Prosessor(this, Application.getAuth());
-		return p.metaxtarkistus();
+	public void käsittele() {
+		Prosessor p = new Prosessor(this, file, Application.getAuth());
+		List<Tiedosto> sallitut = p.metaxtarkistus();
+		if (null != sallitut && !sallitut.isEmpty()) {
+			Tiedostonkäsittely tk = new  Tiedostonkäsittely(response);
+			if (1 == sallitut.size())
+				tk.tiedosto(sallitut.get(0));
+			else
+				tk.zip(sallitut, id);
+		}
 	}
 	
 	
