@@ -92,7 +92,8 @@ public class Metax {
 	return new MetaxResponse(1234, "");
 }
 	
-	public boolean file(String id) {	
+	public String file(String id) {	
+		StringBuffer content = new StringBuffer();
 		boolean b = false;
 		HttpURLConnection con = null;
 		try {
@@ -105,16 +106,12 @@ public class Metax {
 			String inputLine;
 
 			while ((inputLine = in.readLine()) != null) {
-				if (inputLine.contains("open_access")) {
-					System.out.println(inputLine);
-					if (inputLine.contains("true")) 
-						b = true;
-				} 
+				content.append(inputLine);
 				
 			}
 			in.close();
 			con.disconnect(); //??
-			return b;
+			return content.toString();
 		} catch (IOException e) { //https://docs.oracle.com/javase/7/docs/technotes/guides/net/http-keepalive.html
 	        try {
 	                int respCode = ((HttpURLConnection)con).getResponseCode();
@@ -126,13 +123,14 @@ public class Metax {
 	                	System.err.println("File virhetilanne "+respCode+": "+buf.toString());
 	                	
 	                }
+	                
 	                // close the errorstream
 	                es.close();
 	        } catch (IOException e2) {
 	        	System.err.println(e2.getMessage());
 	        }
 		}
-		return false;//content.toString();
+		return null;//content.toString();
 	}
 
 }

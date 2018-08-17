@@ -21,6 +21,8 @@ import com.google.gson.JsonObject;
  *
  */
 public class Json {
+	
+	public static final String OPENACCESFALSE = "open_access-false";
 
 	/**
 	 * Selvittää datasetin tiedostot ja hakemistot metaxin vastauksesta
@@ -123,6 +125,16 @@ public class Json {
 			} else
 				System.err.println("file_storage puuttuu: "+o.getAsString());
 		}
+	}
+
+	public String name(String jsons) {
+		Gson gson = new GsonBuilder().create();
+		JsonObject jo = gson.fromJson(jsons, JsonObject.class);
+		Boolean oa = jo.get("open_access").getAsBoolean();
+		if (null != oa) {
+			if (!oa) return OPENACCESFALSE;
+		}
+		return jo.get("file_name").getAsString();
 	}
 
 }

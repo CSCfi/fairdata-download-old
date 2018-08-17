@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * Pyynnön parameterit prosessoidaan sallitut tiedostot listaksi
+ * 
  * @author pj
  *
  */
@@ -47,8 +49,6 @@ public class Prosessor {
 	 */
 	public List<Tiedosto> metaxtarkistus() {
 
-		List<String> lf = null;
-
 		String dsid = dataset.getId(); 
 		if (null != dsid) {		
 			m = new Metax(dsid, auth);	
@@ -65,10 +65,7 @@ public class Prosessor {
 				List<String> dsdirs = v.lastElement();
 				List<Tiedosto> tl = new ArrayList<Tiedosto>();
 				dsdirs.forEach(d -> selvitähakemistonsisältömetaxista(d, tl));	
-				/*if (null != dsd) {
-					String[] sa = dsd.split(",");
-					Arrays.asList(sa).forEach(e -> dirprosess(e));
-				}*/
+				dsfiles.forEach(f -> selvitätiedostonnimimetaxista(f, tl));
 				if (null != lf) {
 					// oikeasti voi lisätä zippiin!!!
 					return tl.stream().filter(t -> lf.contains(t.getIdentifier())).collect(Collectors.toList());
@@ -89,6 +86,17 @@ public class Prosessor {
 	}	
 
 	
+	private void selvitätiedostonnimimetaxista(String f, List<Tiedosto> tl) {
+		String jsons = m.file(f);
+		if (null != jsons) {
+			String filename = json.name(jsons);
+			if (!Json.OPENACCESFALSE.equals(filename))
+				tl.add(new Tiedosto(f, filename));
+			else 
+				System.out.println("Tiedosto "+f+" ei ollut avoin");
+		}
+	}
+
 	/**
 	 * Selvittää REKURSIIVISESTI (käyttäen  recursive=true parametria) metaxisata
 	 * hakemiston kaikki tiedostot.
@@ -105,6 +113,7 @@ public class Prosessor {
 		}
 	}
 
+	
 	/**
 	 * Näyttää käyttäjälle virheilmoituksen
 	 * 

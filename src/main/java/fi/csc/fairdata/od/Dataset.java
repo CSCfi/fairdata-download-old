@@ -15,7 +15,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Olio pyynnön parametrien tallentamiseen
+ * Olio pyynnön parametrien tallentamiseen ja niiden prosessoinnin kutsuminen
  * 
  * @author pj
  *
@@ -33,6 +33,11 @@ public class Dataset {
 		this.response = response;
 	}
 
+	/**
+	 * Toimintalogiikka: 1. filteroidaan metaxin tietojen perusteella mahdolliset sallitut tiedostot
+	 * 2. Jos tiedostoja on 1 kpl lähetetään se käyttäjälle
+	 * 3. useamman tiedoston tapauksesa ne zipaataan
+	 */
 	public void käsittele() {
 		Prosessor p = new Prosessor(this, file, Application.getAuth());
 		List<Tiedosto> sallitut = p.metaxtarkistus();
