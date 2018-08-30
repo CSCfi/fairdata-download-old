@@ -118,6 +118,9 @@ public class Json {
 					try {
 						String fp = o.getAsJsonObject().get("file_path").getAsString();
 						String id = i.get("identifier").getAsString();
+						/*if (id.equals("__init__.py")) 
+							System.err.println("file_storage id __init__.py"+i.getAsString());
+						else*/
 						ls.add(new Tiedosto(fp, id));
 					} catch (java.lang.NullPointerException e) {
 						System.err.println("Tiedoston tiedot vaillinaiset"+e.getMessage());
@@ -134,7 +137,8 @@ public class Json {
 		if (null != oa) {
 			if (!oa) return OPENACCESFALSE;
 		}
-		return jo.get("file_name").getAsString();
+		return jo.get("file_path").getAsString();
+		//return jo.get("file_name").getAsString();
 	}
 
 }

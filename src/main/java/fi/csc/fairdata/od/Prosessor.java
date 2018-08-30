@@ -91,7 +91,7 @@ public class Prosessor {
 		if (null != jsons) {
 			String filename = json.name(jsons);
 			if (!Json.OPENACCESFALSE.equals(filename))
-				tl.add(new Tiedosto(f, filename));
+				tl.add(new Tiedosto(filename, f));
 			else 
 				System.out.println("Tiedosto "+f+" ei ollut avoin");
 		}
