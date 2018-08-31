@@ -25,6 +25,7 @@ public class Dataset {
 	private final String file; //comma separeted list
 	private final String dir;
 	private final HttpServletResponse response;
+	private String metadata;
 	
 	public Dataset(String id, String file, String dir, HttpServletResponse response) {
 		this.id = id;
@@ -46,7 +47,9 @@ public class Dataset {
 			if (1 == sallitut.size())
 				tk.tiedosto(sallitut.get(0));
 			else
-				tk.zip(sallitut, id);
+				tk.zip(sallitut, id, metadata);
+		} else {
+			p.virheilmoitus(404, "Dataset has no open files");
 		}
 	}
 	
@@ -65,5 +68,13 @@ public class Dataset {
 	
 	public HttpServletResponse getResponse() {
 		return response;
+	}
+
+	public String getMetadata() {
+		return metadata;
+	}
+
+	public void setMetadata(String metadata) {
+		this.metadata = metadata;
 	}
 }

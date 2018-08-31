@@ -61,6 +61,7 @@ public class Prosessor {
 			json = new Json();
 			Vector<List<String>> v = json.file(vastaus.getContent());
 			if (null != v) {
+				dataset.setMetadata(vastaus.getContent()); // lisätään zippiin
 				List<String> dsfiles = v.firstElement();
 				List<String> dsdirs = v.lastElement();
 				List<Tiedosto> tl = new ArrayList<Tiedosto>();
@@ -120,7 +121,7 @@ public class Prosessor {
 	 * @param code int HTTP status code
 	 * @param sisältö String seliseli
 	 */
-	void virheilmoitus(int code, String sisältö) {
+	public void virheilmoitus(int code, String sisältö) {
 		HttpServletResponse r = dataset.getResponse();
 		r.setContentType("text/plain;charset=UTF-8");
 		r.setStatus(code);

@@ -5,6 +5,7 @@ package fi.csc.fairdata.od;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 //import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 //import java.util.zip.ZipFile;
@@ -51,5 +52,21 @@ public class Zip {
 	}
 	ZipOutputStream getZout() {
 		return zout;
+	}
+
+	/**
+	 * Kirjoitta merkkijonon tiedostoksi zippiin. Tiedoston nimi tulee edeltävästä entry kutsusta
+	 *  
+	 * @param metadata String
+	 */
+	public void write(String metadata) {
+		byte[] b = metadata.getBytes(StandardCharsets.UTF_8);
+		try {
+			zout.write(b);
+		} catch (IOException e) {
+			System.err.println("Can't write Metadata.json");
+			e.printStackTrace();
+		}
+		
 	}
 }

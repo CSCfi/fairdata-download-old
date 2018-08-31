@@ -18,16 +18,18 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * Tiedostojen nouto UIDAsta
+ * 
  * @author pj
  *
  */
 public class Tiedostonkäsittely  {
 
 	private HttpServletResponse response;
-	String encoding = null;
+	String encoding = null; //UIDAn kirjautumistiedot
 	
 	/**
-	 * 
+	 * encoding sisältää UIDAn kirjautumistiedot
 	 */
 	public Tiedostonkäsittely(HttpServletResponse response) {
 		this.response = response;
@@ -90,7 +92,15 @@ public class Tiedostonkäsittely  {
 
 	}
 	
-	public void zip(List<Tiedosto> tl, String dsid) {
+	/**
+	 * Noutaa UIDAsta ja zippaa joukon tiedostoja. Zippiin lisätään tiedostoksi Metadata.json
+	 * metaxista haettu metadata.
+	 * 
+	 * @param tl List<Tiedosto> lista zipattavista tiedostoista
+	 * @param dsid String dataset ID, tulee zipin nimeksi
+	 * @param metadata String Datasetin metadata metaxista
+	 */
+	public void zip(List<Tiedosto> tl, String dsid, String metadata) {
 		System.out.println("Zippattavaksi tuli " + tl.size());
 		Zip z = new Zip(response);
 		String zipfilename = dsid+".zip";
@@ -104,10 +114,22 @@ public class Tiedostonkäsittely  {
 		}
 
 		tl.forEach(t -> zippaa(t, z));
+		try {
+			z.entry("Metadata.json");
+			z.write(metadata);
+		} catch (Exception e) {
+			
+		}
 
 		z.sendFinal();
 	}
 
+	/**
+	 * Hakee yhden tiedoston UIDAsta ja lisää sen streamaten zipiin
+	 * 
+	 * @param t Tiedosto tiedosto
+	 * @param z Zip 
+	 */
 	private void zippaa(Tiedosto t, Zip z) {
 		HttpURLConnection con = null;
 		z.entry(t.getFile_path());
@@ -121,7 +143,7 @@ public class Tiedostonkäsittely  {
 				z.getZout().closeEntry();
 			} else {
 				BufferedInputStream in = new BufferedInputStream(is);	
-				in.transferTo((OutputStream)z.getZout());	
+				in.transferTo((OutputStream)z.getZout());	//virtaa suoraan käyttäjälle
 				in.close();
 				z.getZout().closeEntry();
 				con.disconnect(); //??
