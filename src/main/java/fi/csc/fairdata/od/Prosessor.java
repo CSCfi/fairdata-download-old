@@ -107,8 +107,10 @@ public class Prosessor {
 	 */
 	public void selvitähakemistonsisältömetaxista(String dir,  List<Tiedosto> filelist) {
 		MetaxResponse d = m.directories(dir);
-		if (200 == d.getCode())
+		if (200 == d.getCode()) {
 			filelist.addAll(json.dir(d.getContent(), this));
+			//System.out.println(d.getContent());
+		}
 		else {
 			System.err.println("Metax vastasi "+dir+"-hakemistokyselyyn muuta kuin 200: "+d.getCode()+d.getContent());
 		}
@@ -133,6 +135,18 @@ public class Prosessor {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * 
+	 * @return int tiedostojen lukumäärä
+	 */
+	public int noOfFiles() {
+		if ( null == lf) 
+			return 0;
+		else
+			return lf.size();
+	}
+
 	
  /* tilapäisesti pois käytöstä
 	private void dirprosess(String id) {

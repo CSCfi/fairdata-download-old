@@ -41,6 +41,13 @@ public class Metax {
 		}
 	}
 
+	/**
+	 * Hakee datasetin tiedot metaxista. Erityisen tärkeä on metaxrestin 3. parametri,
+	 * jonka on oltava false, jottei tietoja vuoda.
+	 * 
+	 * @param id String dataset id
+	 * @return MetaxResponse Metaxin vastauksen koodi ja sisältö
+	 */
 	public MetaxResponse dataset(String id) {
 		return metaxrest(id, METAXDATASETURL, false, "Dataset");
 	}
@@ -49,6 +56,15 @@ public class Metax {
 		return metaxrest(id, METAXDIRURL, true, DIR);
 	}
 	
+	/**
+	 * 
+	 * @param id String dataset id
+	 * @param url String basic URL to connect, some options will be added
+	 * @param auth boolean true basic auth, false NO authentication: very important to not use auth
+	 * because you'll get GDPR information with auth
+	 * @param name String 
+	 * @return MetaxResponse Object with code and content
+	 */
 	MetaxResponse metaxrest(String id, String url, boolean auth, String name ) {
 	StringBuffer content = new StringBuffer();
 	HttpURLConnection con = null;

@@ -99,34 +99,32 @@ public class Json {
 		Gson gson = new GsonBuilder().create();
 		JsonArray jo = gson.fromJson(content, JsonArray.class);
 		if (null != jo) {
-			jo.forEach(f -> etsistorageid(f, lsf));		
+			jo.forEach(f -> etsiid(f, lsf));		
 		}
 		return lsf;
 	}
 	
 	/**
-	 * Parsii tiedoston storagetunnisteen
+	 * Parsii tiedoston tunnisteen
 	 * 
 	 * @param o JsonElement tiedoston tiedot
 	 * @param ls List<String>, lista johon tunniste lisätään
 	 */
-	private void etsistorageid(JsonElement o, List<Tiedosto> ls) {
-		
+	private void etsiid(JsonElement o, List<Tiedosto> ls) {
+
 		if (null != o) {
-			JsonObject i = o.getAsJsonObject().get("file_storage").getAsJsonObject();
-			if (null != i) {	
-					try {
-						String fp = o.getAsJsonObject().get("file_path").getAsString();
-						String id = i.get("identifier").getAsString();
-						/*if (id.equals("__init__.py")) 
-							System.err.println("file_storage id __init__.py"+i.getAsString());
-						else*/
-						ls.add(new Tiedosto(fp, id));
-					} catch (java.lang.NullPointerException e) {
-						System.err.println("Tiedoston tiedot vaillinaiset"+e.getMessage());
-					}					
-			} else
-				System.err.println("file_storage puuttuu: "+o.getAsString());
+			JsonObject jo = o.getAsJsonObject();
+			try {
+				String fp = jo.get("file_path").getAsString();
+				String id = jo.get("identifier").getAsString();
+				if (jo.get("open_access").getAsBoolean())
+					ls.add(new Tiedosto(fp, id));
+				else
+					System.out.println(id+" Ei ollut avoin "+fp);
+			} catch (java.lang.NullPointerException e) {
+				System.err.println("Tiedoston tiedot vaillinaiset"+e.getMessage());
+			}					
+
 		}
 	}
 
