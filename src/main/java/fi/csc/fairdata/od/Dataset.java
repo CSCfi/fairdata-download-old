@@ -25,7 +25,7 @@ public class Dataset {
 	private final String file; //comma separeted list
 	private final String dir;
 	private final HttpServletResponse response;
-	private String metadata;
+	private String metadata; // not in use
 	
 	public Dataset(String id, String file, String dir, HttpServletResponse response) {
 		this.id = id;
@@ -41,7 +41,7 @@ public class Dataset {
 	 */
 	public void käsittele() {
 		Prosessor p = new Prosessor(this, file, Application.getAuth());
-		List<Tiedosto> sallitut = p.metaxtarkistus();
+		List<Tiedosto> sallitut = p.metaxtarkistus(dir);
 		if (null != sallitut && !sallitut.isEmpty()) {
 			Tiedostonkäsittely tk = new  Tiedostonkäsittely(response);
 			if (1 == p.noOfFiles())
@@ -49,7 +49,7 @@ public class Dataset {
 			else
 				tk.zip(sallitut, id, metadata);
 		} else {
-			p.virheilmoitus(404, "Dataset has no open files");
+			p.virheilmoitus(404, "File(s) requested don't exists or dataset has no open files");
 		}
 	}
 	

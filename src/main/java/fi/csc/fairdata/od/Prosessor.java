@@ -45,9 +45,9 @@ public class Prosessor {
 	/**
 	 * Tarkistaa aineiston=dataset avoimuuden ja siihen kuuluvat tiedostot
 	 * 
-	 * @return List<Tiedosto> mahdolliset aneiston avoimet tiedostot lista
+	 * @return List<Tiedosto> mahdolliset aineiston avoimet tiedostot lista
 	 */
-	public List<Tiedosto> metaxtarkistus() {
+	public List<Tiedosto> metaxtarkistus(String dirs) {
 
 		String dsid = dataset.getId(); 
 		if (null != dsid) {		
@@ -59,19 +59,32 @@ public class Prosessor {
 				return null;
 			}			
 			json = new Json();
-			Vector<List<String>> v = json.file(vastaus.getContent());
-			if (null != v) {
-				dataset.setMetadata(vastaus.getContent()); // lisätään zippiin
-				List<String> dsfiles = v.firstElement();
-				List<String> dsdirs = v.lastElement();
-				List<Tiedosto> tl = new ArrayList<Tiedosto>();
-				dsdirs.forEach(d -> selvitähakemistonsisältömetaxista(d, tl));	
-				dsfiles.forEach(f -> selvitätiedostonnimimetaxista(f, tl));
-				if (null != lf) {
+			List<Tiedosto> dsfiles = json.file(vastaus.getContent());
+			if (null != dsfiles) {
+				//dataset.setMetadata(vastaus.getContent()); // lisätään zippiin
+				if (dsfiles.isEmpty()) {
+					virheilmoitus(404, "Datasetissa EI ollut avoimia tiedostoja");
+					return null;
+				}
+				if (null != dirs) { // parametrina hakemisto
+					List<String> ld = Arrays.asList(dirs.split(","));
+					List<Tiedosto> tl = new ArrayList<Tiedosto>();
+					ld.forEach(d -> selvitähakemistonsisältömetaxista(d, tl));
+					List<String> lid = new ArrayList<String>();
+					dsfiles.forEach(f -> lid.add(f.getIdentifier()));
+					List<Tiedosto>  valmiit = tl.stream().filter(t -> lid.contains(t.getIdentifier())).collect(Collectors.toList());
+					if (null != lf) { // parametrina tiedosto/ja
+						dsfiles.stream().filter(t -> lf.contains(t.getIdentifier())).map(t -> valmiit.add(t));
+					}
+					return valmiit;
+				}
+				if (null != lf) { // parametrina tiedosto/ja
 					// oikeasti voi lisätä zippiin!!!
-					return tl.stream().filter(t -> lf.contains(t.getIdentifier())).collect(Collectors.toList());
+					//dsdirs.forEach(d -> selvitähakemistonsisältömetaxista(d.getIdentifier(), tl));	
+					//dsfiles.forEach(f -> selvitätiedostonnimimetaxista(f.identifier, tl));
+					return dsfiles.stream().filter(t -> lf.contains(t.getIdentifier())).collect(Collectors.toList());
 				} else { // koko aineisto
-					return tl;
+					return dsfiles;
 				}
 			} else {
 				virheilmoitus(400, "Metaxin palauttamien datasetin tietojen parsinta epännistui "+
@@ -86,7 +99,7 @@ public class Prosessor {
 		}
 	}	
 
-	
+	/*
 	private void selvitätiedostonnimimetaxista(String f, List<Tiedosto> tl) {
 		String jsons = m.file(f);
 		if (null != jsons) {
@@ -96,7 +109,7 @@ public class Prosessor {
 			else 
 				System.out.println("Tiedosto "+f+" ei ollut avoin");
 		}
-	}
+	}*/
 
 	/**
 	 * Selvittää REKURSIIVISESTI (käyttäen  recursive=true parametria) metaxisata

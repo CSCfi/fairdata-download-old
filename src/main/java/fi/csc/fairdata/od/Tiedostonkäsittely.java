@@ -93,8 +93,7 @@ public class Tiedostonkäsittely  {
 	}
 	
 	/**
-	 * Noutaa UIDAsta ja zippaa joukon tiedostoja. Zippiin lisätään tiedostoksi Metadata.json
-	 * metaxista haettu metadata.
+	 * Noutaa UIDAsta ja zippaa joukon tiedostoja. 
 	 * 
 	 * @param tl List<Tiedosto> lista zipattavista tiedostoista
 	 * @param dsid String dataset ID, tulee zipin nimeksi
@@ -114,12 +113,12 @@ public class Tiedostonkäsittely  {
 		}
 
 		tl.forEach(t -> zippaa(t, z));
-		try {
+		/*try {
 			z.entry("Metadata.json");
 			z.write(metadata);
 		} catch (Exception e) {
 			
-		}
+		}*/
 
 		z.sendFinal();
 	}

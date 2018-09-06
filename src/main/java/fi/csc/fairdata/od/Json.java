@@ -27,18 +27,18 @@ public class Json {
 	/**
 	 * Selvittää datasetin tiedostot ja hakemistot metaxin vastauksesta
 	 * 
-	 * @param vastaus String metaxin dataset/{id} kyselyn vastaus
-	 * @return Vector<List<String>>, jonka alkioina tiedostolista ja hakemistolista
+	 * @param vastaus String metaxin dataset/{id}/files kyselyn vastaus
+	 * @return List<Tiedosto>, avointen tiedostojen lista
 	 */
-	public Vector<List<String>> file(String vastaus) {
+	public List<Tiedosto> file(String vastaus) {
 
-		List<String> lsf = new ArrayList<String>();
-		List<String> lsd = new ArrayList<String>();
+		List<Tiedosto> lsf = new ArrayList<Tiedosto>();
+		//List<String> lsd = new ArrayList<String>();
 
 		Gson gson = new GsonBuilder().create();
-		JsonObject jo = gson.fromJson(vastaus, JsonObject.class);
+		JsonArray ja = gson.fromJson(vastaus, JsonArray.class);
 		try {
-			JsonObject rd = jo.get("research_dataset").getAsJsonObject();
+			/*JsonObject rd = jo.get("research_dataset").getAsJsonObject();
 			try {
 				JsonObject at = rd.get("access_rights").getAsJsonObject().get("access_type").getAsJsonObject();
 				JsonElement id = at.get("identifier");
@@ -49,23 +49,21 @@ public class Json {
 			} catch (java.lang.NullPointerException e) {
 				System.err.println("Datasetistä ei löytynyt pääsyoikeustietoja");
 				return null; 
-			}
+			}*/
 			try {
-				JsonArray ja = rd.get("files").getAsJsonArray();
-				ja.forEach(o -> etsiidt(o, lsf));
+				//JsonArray ja = rd.get("files").getAsJsonArray();
+				ja.forEach(o -> etsiidt(o.getAsJsonObject(), lsf));
 			} catch (java.lang.NullPointerException e) {
 				System.out.println("Datasetistä ei löytynyt tiedostoja.");
 			}
-			try {
+			/*try {
 				JsonArray ja = rd.get("directories").getAsJsonArray();
 				ja.forEach(o -> etsiidt(o, lsd));
 			} catch (java.lang.NullPointerException e) {
 				System.out.println("Datasetistä ei löytynyt hakemistoja.");
-			}
-			Vector<List<String>> v  = new Vector<List<String>>();
-			v.add(lsf);
-			v.add(lsd);
-			return v;
+			}*/
+			
+			return lsf;
 		} catch (java.lang.NullPointerException e) {
 			System.err.println("Muu virhe json parsinnassa");
 			return null;
@@ -73,17 +71,19 @@ public class Json {
 	}
 
 	/**
-	 * Parsii tiedoston tunnisteen (pitäisikö parsia storage???, joita testidatassa näy)
+	 * Parsii tiedoston tunnisteen, file_path:in ja avoimuuden
 	 * 
-	 * @param o JsonElement tiedoston tiedot
-	 * @param ls List<String>, lista johon tunniste lisätään
+	 * @param o JsonObject tiedoston tiedot
+	 * @param ls List<Tiedosto>, lista johon tiedosto lisätään
 	 */
-	private void etsiidt(JsonElement o, List<String> ls) {
+	private void etsiidt(JsonObject o, List<Tiedosto> ls) {
 		
-		if (null != o) {
-			JsonElement i = o.getAsJsonObject().get("identifier");
-			if (null != i)
-				ls.add(i.getAsString());
+		if (null != o && o.get("open_access").getAsBoolean()) {
+			JsonElement i = o.get("identifier");
+			if (null != i) {
+				JsonElement j = o.get("file_path");
+				ls.add(new Tiedosto(j.getAsString(), i.getAsString()));
+			}
 		}
 	}
 

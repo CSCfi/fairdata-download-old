@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Instant;
 import java.util.Base64;
 
 /**
@@ -24,6 +25,7 @@ public class Metax {
 	private final String METAXFILEURL;// = METAXREST+"files/";
 	private final static String FORMAT = "?format=json";
 	public final static String DIR = "Dir";
+	public final static String DATASET = "Dataset";
 	String datasetid;
 	String encoding = null;
 
@@ -49,7 +51,7 @@ public class Metax {
 	 * @return MetaxResponse Metaxin vastauksen koodi ja sisältö
 	 */
 	public MetaxResponse dataset(String id) {
-		return metaxrest(id, METAXDATASETURL, false, "Dataset");
+		return metaxrest(id, METAXDATASETURL, true, DATASET);
 	}
 	
 	public MetaxResponse directories(String id) {
@@ -62,16 +64,18 @@ public class Metax {
 	 * @param url String basic URL to connect, some options will be added
 	 * @param auth boolean true basic auth, false NO authentication: very important to not use auth
 	 * because you'll get GDPR information with auth
-	 * @param name String 
+	 * @param name String metax API to use
 	 * @return MetaxResponse Object with code and content
 	 */
 	MetaxResponse metaxrest(String id, String url, boolean auth, String name ) {
 	StringBuffer content = new StringBuffer();
 	HttpURLConnection con = null;
+	URL furl = null;
 	try { //+/?cr_identifier="+datasetid "&recursive=true"
-		String optio = name.equals(DIR) ? "/files" : ""; 
-		String optio2 = name.equals(DIR) ? "&recursive=true" : ""; 
-		URL furl = new URL(url+id+optio+FORMAT+optio2);
+		String optio = name.equals(DIR) || name.equals(DATASET) ? "/files" : ""; 
+		String optio2 = name.equals(DIR) || name.equals(DATASET) ? "&file_fields=file_path,identifier,open_access" : ""; 		
+		furl = new URL(url+id+optio+FORMAT+optio2);
+		long alku =  System.currentTimeMillis();
 		con = (HttpURLConnection) furl.openConnection();
 		con.setRequestMethod("GET");	
 		if (auth)
@@ -84,6 +88,7 @@ public class Metax {
 		}
 		in.close();
 		con.disconnect(); //??
+		System.out.println(furl.toString()+ " take "+ (System.currentTimeMillis()-alku) + "ms");
 		return new MetaxResponse(con.getResponseCode(), content.toString());
 	} catch (IOException e2) {
 		try {
@@ -95,7 +100,7 @@ public class Metax {
         while ((ret = es.read(buf)) > 0) {
         	content.append(buf);
         	//System.err.write(buf); 
-        	System.err.println(METAXDATASETURL);
+        	System.err.println(furl.toString());
         }
         es.close();
         return new MetaxResponse(respCode, content.toString());
