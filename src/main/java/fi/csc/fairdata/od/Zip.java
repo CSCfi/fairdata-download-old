@@ -35,8 +35,11 @@ public class Zip {
 
 	public void entry(String path) {
 		
+		String clean = path.trim();
+		if (clean.startsWith("/")) // poistetaan jottei zip:ssa ole absolutti polkuja
+			clean = clean.substring(1);
 		try {
-			zout.putNextEntry(new ZipEntry(path.trim()));
+			zout.putNextEntry(new ZipEntry(clean));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}	
